@@ -178,13 +178,16 @@ def similar(a, b):
 
 
 mydb = mysql.connector.connect(
-  host="localhost",
-  user="mydb",
+  host="194.59.164.64",
+  user="u615769276_boitan",
   passwd="password",
-  database="hydro"
+  database="u615769276_finalyear"
 
 )
 mycursor = mydb.cursor()
+mycursor.execute("SELECT * FROM tblCard")
+result = mycursor.fetchall()
+print(result)
 
 #
 def checkAttendance(scardId,datetoday):
@@ -701,6 +704,7 @@ async def main():
 
 
 client.loop.run_until_complete(main())
+
 
 
 
