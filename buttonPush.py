@@ -1,6 +1,7 @@
 import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
 import time
-
+#import bringChildhomerealsql 
+#import NewestCheckInCheckOut 
 def ledLightOnGreen():
     print ("LED Green On")
 
@@ -16,38 +17,42 @@ def ledLightOnGreen():
     GPIO.setup(16,GPIO.OUT)
     print ("LED on")
     GPIO.output(16,GPIO.HIGH)
-    time.sleep(10)
+    time.sleep(5)
     GPIO.cleanup() # Clean up
 
 def ledLightOnRed():
     print ("LED Red On")
+    GPIO.setup(21,GPIO.OUT)
+    GPIO.setup(16,GPIO.OUT)
     GPIO.output(21,GPIO.LOW)
     GPIO.output(16,GPIO.LOW)
 
-    GPIO.setmode(GPIO.BCM)
     GPIO.setwarnings(False)
     GPIO.setup(18,GPIO.OUT)
     print ("LED on")
     GPIO.output(18,GPIO.HIGH)
+    time.sleep(5)
+
     GPIO.cleanup() # Clean up
 
 def ledLightOnOrange():
     print ("LED Orange On")
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(18,GPIO.OUT)
+    GPIO.setup(16,GPIO.OUT)
     GPIO.output(16,GPIO.LOW)
     GPIO.output(18,GPIO.LOW)
 
-    GPIO.setmode(GPIO.BCM)
     GPIO.setwarnings(False)
     GPIO.setup(21,GPIO.OUT)
     print ("LED on")
     GPIO.output(21,GPIO.HIGH)
-
+    time.sleep(5)
     GPIO.cleanup() # Clean up
-
-
 def button_callback(channel):
     print("Button was pushed!")
     #GPIO.cleanup() # Clean up
+#import bringChildhomerealsql 
 
    # ledLightOnGreen()
     #main()
