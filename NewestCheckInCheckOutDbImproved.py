@@ -5,7 +5,7 @@ import time
 from difflib import SequenceMatcher
 import datetime
 from mysql.connector import Error
-
+import buzzer
 import urllib.parse
 
 import asyncio
@@ -178,7 +178,7 @@ def refresh(word, sid, parentName, timeNow):
     disp.display()
 
 
-refresh("1", "2", "3", "4")
+refresh("------------------------------", "Attendance module", "Booting......", "----------------------------")
 
 
 def similar(a, b):
@@ -205,8 +205,8 @@ today = datetime.date.today()
 print(today)
 
 
-def getStudent(conn,cursor):
-
+def getStudent(conn):
+    cursor = conn.cursor(buffered=True)
 
     cursor.execute("SELECT studentId,parentId FROM studentTable WHERE parentId = '867364651663'")
     result = list(cursor.fetchall())
@@ -225,7 +225,9 @@ def getStudent(conn,cursor):
 
 
 #
-def checkAttendance(scardId, datetoday,conn,cursor):
+
+def checkAttendance(scardId, datetoday,conn):
+    cursor = conn.cursor(buffered=True)
 
     # check wherther the card punch card today or not if return any row then yes
     query = """SELECT Attendance FROM Attendance WHERE StudentCardId='%s' AND Datee='%s'""" % (
@@ -257,6 +259,8 @@ def checkAttendance(scardId, datetoday,conn,cursor):
     except Error as error:
         print(error)
 
+    finally:
+        cursor.close()
 
 
 # print(checkAttendance("943343799769",today),"is check attendance")
@@ -265,7 +269,8 @@ def checkAttendance(scardId, datetoday,conn,cursor):
 
 # print(checkAttendance('943343799769',"2019-12-13"),"9s")
 
-def checkCard(scardId, datetoday,conn,cursor):
+def checkCard(scardId, datetoday,conn):
+    cursor = conn.cursor(buffered=True)
 
     attendanceList = []
     # check wherther the card punch card today or not if return any row then yes
@@ -298,13 +303,16 @@ def checkCard(scardId, datetoday,conn,cursor):
     except Error as error:
         print(error)
 
+    finally:
+        cursor.close()
 
 
 # print(checkCard("943343799769",today),"is check CARD")
 # pneed to check here
 
 # print(checkCard('943343799769',"2019-12-123"),"is student check card")
-def checkCardCheckin(scardId, datetoday,conn,cursor):
+def checkCardCheckin(scardId, datetoday,conn):
+    cursor = conn.cursor(buffered=True)
 
     attendanceList = []
     # check wherther the card punch card today or not if return any row then yes
@@ -337,6 +345,8 @@ def checkCardCheckin(scardId, datetoday,conn,cursor):
     except Error as error:
         print(error)
 
+    finally:
+        cursor.close()
 
 
 # print(checkCardCheckin("943343799769","2019-12-19"),"is the result from the list")
@@ -387,7 +397,8 @@ def checkCardCheckin(scardId, datetoday,conn,cursor):
 # undone part !!!!!!!!!!!!!!!!!
 
 
-def CheckIfNotNull(scardID, datetoday,conn,cursor):
+def CheckIfNotNull(scardID, datetoday,conn):
+    cursor = conn.cursor(buffered=True)
 
     attendanceList = []
     # check wherther the card punch card today or not if return any row then yes
@@ -421,11 +432,13 @@ def CheckIfNotNull(scardID, datetoday,conn,cursor):
     except Error as error:
         print(error)
 
+    finally:
+        cursor.close()
 
 
 # print(CheckIfNotNull('943343799769','2020-04-00'),"is the check if not null")
 
-def updateCheckOut(CardId, checkouttime,conn,cursor):
+def updateCheckOut(CardId, checkouttime,conn):
 
     cursor = conn.cursor(prepared=True)
     try:
@@ -440,10 +453,11 @@ def updateCheckOut(CardId, checkouttime,conn,cursor):
 
     except mysql.connector.Error as error:
         print("updateCheckOut parameterized query failed {}".format(error))
+    finally:
+        cursor.close()
 
 
-
-def insertStudentCheckin(CardId, datetoday,conn,cursor):
+def insertStudentCheckin(CardId, datetoday,conn):
 
     cursor = conn.cursor(prepared=True)
     try:
@@ -459,9 +473,12 @@ def insertStudentCheckin(CardId, datetoday,conn,cursor):
 
     except mysql.connector.Error as error:
         print("attendance table parameterized query failed {}".format(error))
-   
+    finally:
+        cursor.close()
 
-def getParentName(studentId,conn,cursor):
+
+def getParentName(studentId,conn):
+    cursor = conn.cursor(buffered=True)
 
     attendanceList = []
     # check wherther the card punch card today or not if return any row then yes
@@ -494,10 +511,12 @@ def getParentName(studentId,conn,cursor):
     except Error as error:
         print(error)
 
-  
+    finally:
+        cursor.close()
 
 
-def getStudentName(studentId,conn,cursor):
+def getStudentName(studentId,conn):
+    cursor = conn.cursor(buffered=True)
 
     attendanceList = []
     # check wherther the card punch card today or not if return any row then yes
@@ -530,10 +549,12 @@ def getStudentName(studentId,conn,cursor):
     except Error as error:
         print(error)
 
- 
+    finally:
+        cursor.close()
 
 
-def getParentId(studentId,conn,cursor):
+def getParentId(studentId,conn):
+    cursor = conn.cursor(buffered=True)
 
     attendanceList = []
     # check wherther the card punch card today or not if return any row then yes
@@ -566,10 +587,12 @@ def getParentId(studentId,conn,cursor):
     except Error as error:
         print(error)
 
+    finally:
+        cursor.close()
 
 
-
-def validStudent(studentId, dateToday, type,conn,cursor):
+def validStudent(studentId, dateToday, type,conn):
+    cursor = conn.cursor(buffered=True)
 
     attendanceList = []
     # check wherther the card punch card today or not if return any row then yes
@@ -602,24 +625,25 @@ def validStudent(studentId, dateToday, type,conn,cursor):
     except Error as error:
         print(error)
 
-
+    finally:
+        cursor.close()
 
 
 # print(getParentName(943343799769),"is parent Name")
 # print(getStudentName(943343799769),"is student Name")
 # print(getParentId(943343799769),"is pARENT ID")
 
-def insertCheckinNotification(sCardId, timeNow, datetoday,conn,cursor):
+def insertCheckinNotification(sCardId, timeNow, datetoday,conn):
 
     cursor = conn.cursor(prepared=True)
     try:
-        parentName = getParentName(sCardId)
-        studentName = getStudentName(sCardId)
-        parentId = getParentId(sCardId)
+        parentName = getParentName(sCardId,conn)
+        studentName = getStudentName(sCardId,conn)
+        parentId = getParentId(sCardId,conn)
 
         message = "Dear " + str(parentName) + ", Your Child " + str(studentName) + " Check In at " + str(timeNow)
-        numOfResult = validStudent(sCardId, datetoday, "checkIn")
-        numOfResult2 = validStudent(sCardId, datetoday, "checkOut")
+        numOfResult = validStudent(sCardId, datetoday, "checkIn",conn)
+        numOfResult2 = validStudent(sCardId, datetoday, "checkOut",conn)
         totalResult = int(numOfResult) + int(numOfResult2)
         confirmStatus = "0"
         type = "CheckIn"
@@ -638,19 +662,21 @@ def insertCheckinNotification(sCardId, timeNow, datetoday,conn,cursor):
 
     except mysql.connector.Error as error:
         print("tblNotification table parameterized query failed {}".format(error))
+    finally:
+        cursor.close()
 
 
-def insertCheckoutNotification(sCardId, timeNow, datetoday,conn,cursor):
+def insertCheckoutNotification(sCardId, timeNow, datetoday,conn):
 
     cursor = conn.cursor(prepared=True)
     try:
-        parentName = getParentName(sCardId)
-        studentName = getStudentName(sCardId)
-        parentId = getParentId(sCardId)
+        parentName = getParentName(sCardId,conn)
+        studentName = getStudentName(sCardId,conn)
+        parentId = getParentId(sCardId,conn)
 
         message = "Dear " + str(parentName) + ", Your Child " + str(studentName) + " Check Out at " + str(timeNow)
-        numOfResult = validStudent(sCardId, datetoday, "checkIn")
-        numOfResult2 = validStudent(sCardId, datetoday, "checkOut")
+        numOfResult = validStudent(sCardId, datetoday, "checkIn",conn)
+        numOfResult2 = validStudent(sCardId, datetoday, "checkOut",conn)
         totalResult = int(numOfResult) + int(numOfResult2)
         confirmStatus = "0"
         type = "CheckOut"
@@ -669,9 +695,12 @@ def insertCheckoutNotification(sCardId, timeNow, datetoday,conn,cursor):
 
     except mysql.connector.Error as error:
         print("tblNotification table parameterized query failed {}".format(error))
+    finally:
+        cursor.close()
 
 
-def findParentId(studentCardId,conn,cursor):
+def findParentId(studentCardId,conn):
+    cursor = conn.cursor(buffered=True)
 
     attendanceList = []
     # check wherther the card punch card today or not if return any row then yes
@@ -704,8 +733,12 @@ def findParentId(studentCardId,conn,cursor):
     except Error as error:
         print(error)
 
- 
-def findFbId(parentCardId,conn,cursor):
+    finally:
+        cursor.close()
+
+
+def findFbId(parentCardId,conn):
+    cursor = conn.cursor(buffered=True)
 
     attendanceList = []
     # check wherther the card punch card today or not if return any row then yes
@@ -738,10 +771,11 @@ def findFbId(parentCardId,conn,cursor):
     except Error as error:
         print(error)
 
+    finally:
+        cursor.close()
 
 
-
-def updateCheckin(CardId, checkInTime,conn,cursor):
+def updateCheckin(CardId, checkInTime,conn):
 
     cursor = conn.cursor(prepared=True)
     try:
@@ -756,9 +790,12 @@ def updateCheckin(CardId, checkInTime,conn,cursor):
 
     except mysql.connector.Error as error:
         print("update attendance parameterized query failed {}".format(error))
-   
+    finally:
+        cursor.close()
 
-def allStudrecord(conn,cursor):
+
+def allStudrecord(conn):
+    cursor = conn.cursor(buffered=True)
 
     attendanceList = []
     # check wherther the card punch card today or not if return any row then yes
@@ -786,13 +823,16 @@ def allStudrecord(conn,cursor):
     except Error as error:
         print(error)
 
+    finally:
+        cursor.close()
 
 
 # print(allStudrecord())
 # insertStudentCheckin(z, today)
 
 
-def checkStudentCardStatus(sCardId,conn,cursor):
+def checkStudentCardStatus(sCardId,conn):
+    cursor = conn.cursor(buffered=True)
 
     # check wherther the card punch card today or not if return any row then yes
     query = """SELECT studentCardStatus FROM studentTable WHERE studentId = '%s'""" % (
@@ -824,13 +864,15 @@ def checkStudentCardStatus(sCardId,conn,cursor):
     except Error as error:
         print(error)
 
-
+    finally:
+        cursor.close()
 
 
 # print(checkStudentCardStatus(943343799769),"is staatus student card")
 
 
-def checkParentCardStatus(pCardId,conn,cursor):
+def checkParentCardStatus(pCardId,conn):
+    cursor = conn.cursor(buffered=True)
 
     attendanceList = []
     # check wherther the card punch card today or not if return any row then yes
@@ -863,7 +905,9 @@ def checkParentCardStatus(pCardId,conn,cursor):
     except Error as error:
         print(error)
 
- 
+    finally:
+        cursor.close()
+
 
 # print(allStudrecord(),"is student record")
 newStudentList = []
@@ -872,7 +916,7 @@ newStudentList = []
 # print(CheckIfNotNull('943343799769','2019-12-19'),"is check if not null")
 
 async def main():
-    await client.start("0169787592", "sososo123")
+    await client.start("0169787592", "jijiji123")
     print("****Login Success*****")
     print(f"Own ID: {client.uid}")
     # await client.logout()
@@ -881,6 +925,7 @@ async def main():
 
     try:
         while True:
+            conn = connectSql()
             studentCardList = [943343799769]
             parentCardList = [867364651663]
             # store the list of card to check
@@ -888,9 +933,8 @@ async def main():
             counter = 0
             today = datetime.date.today()
 
-            cursor = conn.cursor(buffered=True)
 
-            for x in allStudrecord(conn,cursor):
+            for x in allStudrecord(conn):
                 bad_chars = [';', ':', '!', "*", "'", "[", "]"]
                 test_string = ''.join(i for i in x if not i in bad_chars)
                 print(str(test_string), " in new student list")
@@ -899,12 +943,12 @@ async def main():
             try:
                 for z in newStudentList:
                     # newStudentList return all the student card id in card table
-                    if z != "None" and int(checkCard(z, today,conn,cursor)) < 1:
+                    if z != "None" and int(checkCard(z, today,conn)) < 1:
                         # if student id is not equal to none and check card today record is lest than one
                         print("Havent punch card today", z)
                         # then help that student to insert record
-                        insertStudentCheckin(z, today,conn,cursor)
-                    elif z != "None" and int(checkCard(z, today,conn,cursor)) >= 1:
+                        insertStudentCheckin(z, today,conn)
+                    elif z != "None" and int(checkCard(z, today,conn)) >= 1:
                         print(z, "punch card already today!")
             except:
                 print("***Something else when wrong***")
@@ -917,6 +961,8 @@ async def main():
 
             print("Scan your Card to record attendance")
             id1, text = reader.read()
+            buzzer.buzzerOn()
+
             refresh("-----------------------------", "Reading Card....", "Recording Attendance...", "----------------------------------")
 
             # get the id and name of the card
@@ -936,12 +982,12 @@ async def main():
             todaytime = datetime.datetime.now().time().replace(microsecond=0)
 
             print(todaytime)
-            studentCardStatus = checkStudentCardStatus(myCardId,conn,cursor)
+            studentCardStatus = checkStudentCardStatus(myCardId,conn)
             print(studentCardStatus, "is card status")
             if studentCardStatus == "Valid":
-                parentId = findParentId(myCardId,conn,cursor)
+                parentId = findParentId(myCardId,conn)
                 # get the parent id by scanning student id
-                parentFb = findFbId(parentId,conn,cursor)
+                parentFb = findFbId(parentId,conn)
             else:
                 parentFb = ""
                 parentId = ""
@@ -953,8 +999,8 @@ async def main():
                 if studentCardStatus == "Valid":
                     print("card valid")
 
-                    checkCardIn = checkCardCheckin(myCardId, today,conn,cursor)
-                    checkAttend = checkAttendance(myCardId, today,conn,cursor)
+                    checkCardIn = checkCardCheckin(myCardId, today,conn)
+                    checkAttend = checkAttendance(myCardId, today,conn)
                     print(checkCardIn, "is checkcard")
                     print(myCardId, today)
                     if checkCardIn == str(1) or checkCardIn == (1):
@@ -963,13 +1009,13 @@ async def main():
                         # student already punch card but no check in record found
                         #
                         print("Havent punch card today")
-                        bl = CheckIfNotNull(myCardId, today,conn,cursor)
+                        bl = CheckIfNotNull(myCardId, today,conn)
                         if bl == "" or bl == "None":
                             # if the check in return null or havent check in yet
 
                             print("Student Havent check in yet")
-                            updateCheckin(myCardId, todaytime,conn,cursor)
-                            insertCheckinNotification(myCardId, todaytime, today,conn,cursor)
+                            updateCheckin(myCardId, todaytime,conn)
+                            insertCheckinNotification(myCardId, todaytime, today,conn)
                             refresh("----------------------------", "Checked In", "Successfully", "-----------------------")
                             ledLightOnOrange()
 
@@ -996,7 +1042,7 @@ async def main():
                         else:
                             #
                             print("updating the checwwwwwk out")
-                            updateCheckOut(myCardId, todaytime,conn,cursor)
+                            updateCheckOut(myCardId, todaytime,conn)
                             # get the parent id for search it in the email or fb
                             if parentId != "None":  # if the user really have fb id
                                 print("None")
@@ -1019,14 +1065,14 @@ async def main():
 
 
 
-                    elif int(checkCard(myCardId, today,conn,cursor)) >= 1 and CheckIfNotNull(myCardId, today,conn,cursor) != "None":
+                    elif int(checkCard(myCardId, today,conn)) >= 1 and CheckIfNotNull(myCardId, today,conn) != "None":
 
                         # if the check in is not null and already insert today but the card
                         # print("punch check in already")
                         print("updating the check out")
 
-                        updateCheckOut(myCardId, todaytime,conn,cursor)
-                        insertCheckoutNotification(myCardId, todaytime, today,conn,cursor)
+                        updateCheckOut(myCardId, todaytime,conn)
+                        insertCheckoutNotification(myCardId, todaytime, today,conn)
                         refresh("------------------------------", "Checking Out", "Please Wait......",
                                 "------------------------------")
                         ledLightOnGreen()
@@ -1074,6 +1120,9 @@ async def main():
 
         # print(str(myFirstCardId),"printed in string")
         # check for duplicated entry
+    except Exception as e:
+        print(e)
+        print("£££Something when wrong£££")
 
 
 

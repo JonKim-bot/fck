@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 from mfrc522 import SimpleMFRC522
+from gpiozero import Buzzer
 
 import Adafruit_GPIO.SPI as SPI
 import Adafruit_SSD1306
@@ -10,9 +11,27 @@ from PIL import ImageFont
 import subprocess
 import smtplib, ssl
 import time
-
+import buzzer
 #import datetime
 from mysql.connector import Error
+from gpiozero import LED
+
+def ledLightOnRed():
+    print("LED Red On")
+    GPIO.setmode(GPIO.BCM)
+
+
+    GPIO.setwarnings(False)
+    GPIO.setup(18, GPIO.OUT)
+    print("LED on")
+    GPIO.output(18, GPIO.HIGH)
+    time.sleep(0.5)
+
+    GPIO.cleanup()  # Clean up
+
+    
+ledLightOnRed()
+
 
 def refresh(word, sid, parentName, timeNow):
     # Raspberry Pi pin configuration:
@@ -119,10 +138,13 @@ while True:
         refresh("-------------------", "Scan the card", "TO DETECT", "-----------------------------")
 
         id, text = reader.read()
+        buzzer.buzzerOn()
+        ledLightOnRed()
+
         print(id)
         print(text)
         refresh("-------Card Id-------", id, "-------Card Name-------", text)
-        time.sleep(5)
+        time.sleep(3)
     finally:
         GPIO.cleanup()
 
