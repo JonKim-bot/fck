@@ -14,8 +14,9 @@ import subprocess
 import smtplib, ssl
 import time
 
-#import datetime
+# import datetime
 from mysql.connector import Error
+
 
 def refresh(word, sid, parentName, timeNow):
     # Raspberry Pi pin configuration:
@@ -114,9 +115,9 @@ def refresh(word, sid, parentName, timeNow):
     disp.display()
 
 
-
 refresh("1", "2", "3", "4")
 reader = SimpleMFRC522()
+
 
 def connectSql():
     conn = mysql.connector.connect(
@@ -126,11 +127,12 @@ def connectSql():
         database="u615769276_finalyear"
     )
     return conn
+
+global conn
 conn = connectSql()
 
-def checkCardExistStudent(scannedCard):
 
-    conn = connectSql()
+def checkCardExistStudent(scannedCard,conn):
     # check wherther the card punch card today or not if return any row then yes
     query = """SELECT studentId FROM studentTable WHERE studentId = '%s'""" % (
         str(scannedCard))
@@ -156,9 +158,9 @@ def checkCardExistStudent(scannedCard):
 
     finally:
         cursor.close()
-def checkCardExistParent(scannedCard):
 
-    conn = connectSql()
+
+def checkCardExistParent(scannedCard,conn):
     # check wherther the card punch card today or not if return any row then yes
     query = """SELECT parentId FROM parentTable WHERE parentId = '%s'""" % (
         str(scannedCard))
@@ -184,18 +186,18 @@ def checkCardExistParent(scannedCard):
 
     finally:
         cursor.close()
-def registerStudentCard(studentId,studentName):
-    conn = connectSql()
+
+
+def registerStudentCard(studentId, studentName,conn):
 
     cursor = conn.cursor(prepared=True)
     try:
-        
-        if (checkCardExistStudent(studentId) == False) and (checkCardExistParent(studentId) == False):
+
+        if (checkCardExistStudent(studentId,conn) == False) and (checkCardExistParent(studentId,conn) == False):
             # if studentcard never register yet
             sql_insert_query = """INSERT INTO studentTable (studentId,studentName,studentCardStatus) VALUES (%s,%s,%s)"""
 
-            insert_tuple = (studentId,studentName,"Invalid")
-            
+            insert_tuple = (studentId, studentName, "Invalid")
 
             cursor.execute(sql_insert_query, insert_tuple)
             conn.commit()
@@ -205,7 +207,7 @@ def registerStudentCard(studentId,studentName):
             time.sleep(2)
         else:
             print("Student Card Registered")
-            refresh("--------------------", "This card ", "already registered", "----------------------")
+            refresh("---------------------------", "This card ", "already registered", "-------------------------------")
             time.sleep(2)
 
 
@@ -213,18 +215,19 @@ def registerStudentCard(studentId,studentName):
         print("student table parameterized query failed {}".format(error))
     finally:
         cursor.close()
-def registerParentCard(parentId,parentName):
+
+
+def registerParentCard(parentId, parentName):
     conn = connectSql()
 
     cursor = conn.cursor(prepared=True)
     try:
-        
-        if (checkCardExistParent(parentId) == False) and (checkCardExistStudent(parentId) == False):
+
+        if (checkCardExistParent(parentId,conn) == False) and (checkCardExistStudent(parentId,conn) == False):
             # if studentcard never register yet
             sql_insert_query = """INSERT INTO parentTable (parentId,parentName,parentCardStatus) VALUES (%s,%s,%s)"""
 
-            insert_tuple = (parentId,parentName,"Valid")
-            
+            insert_tuple = (parentId, parentName, "Valid")
 
             cursor.execute(sql_insert_query, insert_tuple)
             conn.commit()
@@ -242,6 +245,8 @@ def registerParentCard(parentId,parentName):
         print("student table parameterized query failed {}".format(error))
     finally:
         cursor.close()
+
+
 def registerParent():
     try:
         refresh("--------------------", "Register Parent", "Input Parent Name", "----------------------")
@@ -249,50 +254,52 @@ def registerParent():
         text = input("Parent Name : ")
         print("Place card to write")
         reader.write(text)
-        refresh("----------------------", "Reading Card", "Please Wait", "----------------------")
+        refresh("-----------------------------", "Reading Card", "Please Wait", "-------------------------------")
 
         print("written parentName")
         id, text = reader.read()
 
         print(id)
         print(text)
-        registerParentCard(id,text)
+        registerParentCard(id, text)
     except Exception as e:
         print(e)
         print("Error occur, please try again")
     finally:
         GPIO.cleanup()
-        
+
+
 def registerStudent():
     try:
-        refresh("--------------------", "Register student", "Input student Name", "----------------------")
+        refresh("------------------------------------------", "Register student", "Input student Name", "----------------------")
 
         text = input("Student Name : ")
         print("Place card to write")
         reader.write(text)
-        refresh("----------------------", "Reading Card", "Please Wait", "----------------------")
+        refresh("--------------------------------------------", "Reading Card....", "Please Wait", "----------------------")
 
         print("written studentTable")
         id, text = reader.read()
         print(id)
         print(text)
-        registerStudentCard(id,text)
+        registerStudentCard(id, text)
     except Exception as e:
         print(e)
         print("Error occur, please try again")
     finally:
         GPIO.cleanup()
+
+
 while True:
     refresh("Select register people", "1 - Parent", "2 - Student ", "----------------------")
 
     getUserInput = input("Select register people\n1-Parent\n2-Student\n:")
     if (int(getUserInput) == 1):
         registerParent()
-    elif(int(getUserInput) == 2):
+    elif (int(getUserInput) == 2):
         registerStudent()
     else:
         print("Invalid Selection")
-        refresh("----------------------", "Invalid", "Selection", "----------------------")
+        refresh("-------------------------------", "Invalid", "Selection", "---------------------------------")
 
 
-        
