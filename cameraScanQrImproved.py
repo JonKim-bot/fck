@@ -132,12 +132,16 @@ def getParentName(email,conn):
         cursor.close()
 
 def sendEmail(email,studentName,todayDate,timeToday):
-
+    print("sending email")
+    print(email)
+    print(studentName)
+    print(todayTime)
+    print(timeToday)
     msg = MIMEMultipart()
     msg['From'] = "boitan@piegensoftware.com"
     msg['To'] = email
     msg['Subject'] = 'Qr Code Pick Up'
-    message = 'Your kid ' ,studentName , "\nGet picked up today at the date of ", todayDate , " ", timeToday ," \nThanks,\nThe Piegen team"
+    message = 'Your kid ' + str(studentName)  + "\nGet picked up today at the date of " +  str(todayDate) + " " + str(timeToday) + " \n\nThanks,\nThe Piegen team"
 
     msg.attach(MIMEText(message))
 
@@ -148,6 +152,7 @@ def sendEmail(email,studentName,todayDate,timeToday):
     # secure our email with tls encryption
     mailserver.starttls()
     # re-identify ourselves as an encrypted connection
+
     mailserver.ehlo()
     mailserver.login('boitan@piegensoftware.com', 'caonima123')
 
@@ -292,7 +297,7 @@ def validStudent(sCardId, dateToday, type1,conn):
 
 def insertQr(parentId, parentName, studentId, type, status, message, checkInOutTime, msgDate,
              confirmStatus,conn):
-    cursor = conn.cursor(prepared=True)
+    cursor = conn.cursor(buffered=True)
     try:
 
         sql_insert_query = """INSERT INTO tblNotifications (parentId,parentName,studentId,type,status,message,checkInOutTime,msgDate,confirmStatus) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
@@ -439,6 +444,7 @@ def insertQrPickUp(updateId, pickUpDate, timeNow,conn):
         # print(len(result),"num row")
         if len(result) > 0:
             data = ''
+
             parentId = final_result[0][1]
             parentName = final_result[0][3]
             studentId = final_result[0][2]
@@ -472,7 +478,8 @@ def insertQrPickUp(updateId, pickUpDate, timeNow,conn):
 
 def checkBooking(studentName, pickUpDate, pickUpTimeOne, pickUpTimeTwo, todayTime,conn):
     # check booking data by passing all data inhere
-    # check booking data by passing all data inhere
+    # check booking data by passing all
+    # data inhere
     TimeNow = (datetime.now().strftime("%H:%M"))
     today = date.today()
     print(today, " is today")
@@ -486,12 +493,12 @@ def checkBooking(studentName, pickUpDate, pickUpTimeOne, pickUpTimeTwo, todayTim
                 # extablish the connection again
                 # pass in the query and the argurment
                 # pass in the query and the argurment
-
+    
                 cursor = conn.cursor(buffered=True)
-
+    
                 query = """SELECT * FROM tblParentBooking WHERE studentName='%s' AND pickUpDate='%s' AND pickUpTimeOne='%s' AND pickUpTimeTwo='%s' AND status='unuse'""" % (
                     (studentName, pickUpDate, pickUpTimeOne, pickUpTimeTwo))
-
+    
                 cursor.execute(query)
                 conn.commit()
                 result = list(cursor.fetchall())
@@ -504,63 +511,66 @@ def checkBooking(studentName, pickUpDate, pickUpTimeOne, pickUpTimeTwo, todayTim
                     print(pickUpDate)
                     insertQrPickUpId = insertQrPickUp(updateId, pickUpDate, todayTime,conn)
                     print(insertQrPickUpId, "is pick up status")
-
+    
                     if insertQrPickUpId == "Insert Qr PickUp Success":
                         updateStatus = updateBooking(updateId,conn)
                         print(updateStatus)
-
+    
                         if (updateStatus == "Booking Update Success"):
                             finalData = "Valid"
                         else:
                             finalData = "Not Valid"
-
+    
                     else:
                         finalData = "Not Valid"
                 else:
                     finalData = "Not Valid"
                 print(finalData)
-
+    
                 if finalData == "Valid":
                     ledLightOnGreen()
-
+                    print("final data valid pick up date",pickUpDate)
                     refresh("------------------------------", "Valid Qr Code", studentName, "-------------------------------")
                     parentId = getParentId(studentName, pickUpDate, pickUpTimeOne, pickUpTimeTwo,conn)
                     # get parent id from tblparentbooking
                     print(parentId)
                     parentEmail = getEmail(parentId,conn)
+    
                     # get email by passing the parent id
                     print("parent email", parentEmail)
-                    sendEmail(parentEmail,studentName,pickUpDate,todayTime)
+    
+    
+                    sendEmail(parentEmail,studentName,pickUpDate,TimeNow)
                     # send confirm email
                     print("can bring children home")
                     tkinter.messagebox.showinfo(title="Valid Qr Code", message="Qr code Valid, Pick Up Successful")
-
+    
                 elif finalData == "Not Valid":
                     refresh("------------------------------", "Qr code Expired ", "Not able to use", "------------------------------")
-
+    
                     ledLightOnRed()
                     print("qr code expired")
                     tkinter.messagebox.showinfo(title="Qr Code Not Valid", message="Qr code Expired")
-
+    
                 elif finalData == "No Record Found":
                     refresh("------------------------------", "No Booking Found ", "Qr Code Invalid", "------------------------------")
                     ledLightOnRed()
-
+    
                     tkinter.messagebox.showwarning(title="No Booking Record Found",
                                                    message="No Booking Record Found , Please make the booking first.")
-
+    
                     print("No Booking Record Found , Please make the booking first.")
             else:
                 refresh("-----------------------------", "Time not reach yet", "Qr code Time: "+str(pickUpTimeOne),
                         "-----------------------------")
                 ledLightOnRed()
-
+    
                 tkinter.messagebox.showwarning(title="Time Not Reached Yet",
                                                message="Time Now Are Not With in the range")
-
+    
                 print("Booking Time Not With In The Range")
         else:
-
+    
             print("Booking Date are not today!")
             ledLightOnRed()
             refresh("------------------------------", "Booking Date Invalid", "Date : " + str(pickUpDate), "------------------------------")
@@ -568,11 +578,11 @@ def checkBooking(studentName, pickUpDate, pickUpTimeOne, pickUpTimeTwo, todayTim
                                            message="Booking Date are not today,please try again with another qr code")
 
     except Error as error:
-        refresh("------------------------------", "Qr code Expired ", "Not able to use",
-                "------------------------------")
+         refresh("------------------------------", "Qr code Expired ", "Not able to use",
+                 "------------------------------")
 
-        print(error)
-        ledLightOnRed()
+    #     print(error)
+        # ledLightOnRed()
 
 
 # finally:
@@ -615,7 +625,8 @@ while True:
                 print(qrcodeArr[2])
                 print(qrcodeArr[3])
                 TimeNow = (datetime.now().strftime("%H:%M"))
-                todayTime = datetime.now().time()
+                todayTime  = datetime.now().time().replace(microsecond=0)
+
                 print(todayTime)
 
                 checkBooking(qrcodeArr[0], qrcodeArr[1], qrcodeArr[2], qrcodeArr[3], todayTime,conn)
@@ -623,6 +634,7 @@ while True:
 
             except Exception as e:
                 print(e)
+
 
                 #      cap.release()
                 #     cv2.destroyAllWindows()
