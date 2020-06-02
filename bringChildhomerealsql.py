@@ -333,8 +333,8 @@ def autentication(ScannedCard):
     conn = connectSql()
 
     # check parent and student card id , return it in a array form
-    query = """SELECT parentId,studentId FROM tblCard WHERE studentId='%s' or parentId = '%s' AND parentId IS NOT NULL AND studentId IS NOT NULL""" % (
-        str(ScannedCard),str(ScannedCard))
+    query = """SELECT parentId,studentId FROM tblCard WHERE studentId='%s' AND studentId IS NOT NULL""" % (
+        str(ScannedCard))
     cursor = conn.cursor(buffered=True)
 
     try:
@@ -359,7 +359,7 @@ def autentication(ScannedCard):
         cursor.close()
 
 
-print(autentication("943343799769"))
+#print(autentication("943343799769"))
 
 def getCard2idRemix():
     print("Please autenticated your second card")
@@ -628,8 +628,9 @@ def findFbId(parentCardId):
 reader = SimpleMFRC522()
 
 
+#def main():
 async def main():
-    await client.start("0169787592", "caonima123")
+    await client.start("0169787592", "sososo123")
     print("****Login Success*****")
     print(f"Own ID: {client.uid}")
 
@@ -641,6 +642,8 @@ async def main():
         time.sleep(3)
 
         id, text2 = reader.read()
+        refresh("----------------", "PLEASE WAIT", "READING CARD", "---------------")
+
         mySecCard = text2
         mySecCardId = id
         return mySecCardId
@@ -673,6 +676,7 @@ async def main():
                 newA = [x.strip(' [ ] ') for x in newAuten]
             else:
                 newA=['None','None']
+                
             print(newA[0], "index 0 ")
             print(newA)
 
@@ -681,7 +685,7 @@ async def main():
             today = datetime.date.today()
 
             print(today)
-            todaytime = datetime.datetime.now().time()
+            todaytime = datetime.datetime.now().time().replace(microsecond=0)
             print(todaytime)
 
             print(myFirstCardId)
@@ -713,6 +717,7 @@ async def main():
                     Card2id = getCard2id()
                     # get the secound index to be scanned
                     print(str(Card2id))
+                    
                     print("parent scanned ")
                     studentCardStatus = checkStudentCardStatus(int(Card2id))
                     # check student card status
@@ -835,11 +840,11 @@ async def main():
                 else:
                     if int(validPickUp2) >= 1:
                         # if student picked up already
-                        refresh("--  - - ", "student card scanned", "Please try agn tmr", "------")
+                        refresh("--------------------------------", str(myFirstCard)+" Go backed", "This student go back already", "------------------------------")
                         ledLightOnRed()
                     elif parentCardStatus != "Valid":
 
-                        refresh("--  - - ", "parent card invalid", "Please try again", "------")
+                        refresh("--------------------------", "parent card invalid", "Please try again", "--------------------------")
               
                         ledLightOnRed()
 
@@ -873,5 +878,5 @@ async def main():
     finally:
         GPIO.cleanup()
 
-
+#main()
 client.loop.run_until_complete(main())

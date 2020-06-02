@@ -9,9 +9,13 @@ from mysql.connector import Error
 
 import urllib.parse
 
+
+import asyncio
 import urllib.request
 import json
+from fbchat import *
 from fbchat import Client, ThreadType, Message
+
 from urllib import request, parse
 from urllib.request import Request, urlopen
 import subprocess
@@ -919,7 +923,7 @@ newStudentList = []
 # print(CheckIfNotNull('943343799769','2019-12-19'),"is check if not null")
 
 async def main():
-    await client.start("0169787592", "caonima123")
+    await client.start("0169787592", "sososo123")
     print("****Login Success*****")
     print(f"Own ID: {client.uid}")
     # await client.logout()
@@ -935,6 +939,7 @@ async def main():
 
             counter = 0
             today = datetime.date.today()
+
 
 
             for x in allStudrecord():
@@ -979,7 +984,8 @@ async def main():
             myCardId = id1  #
             today = datetime.date.today()
             print(today)
-            todaytime = datetime.datetime.now().time()
+            todaytime = datetime.datetime.now().time().replace(microsecond=0)
+
             print(todaytime)
             studentCardStatus = checkStudentCardStatus(myCardId)
             print(studentCardStatus, "is card status")
@@ -1046,7 +1052,7 @@ async def main():
                             updateCheckOut(myCardId, todaytime)
                             # get the parent id for search it in the email or fb
                             if parentId != "None":  # if the user really have fb id
-
+                                print("None")
                                 user = (await client.search_for_users(parentFb))[0]
                                 parentFbId = user.uid
                                 parentFbName = user.name
@@ -1124,5 +1130,5 @@ async def main():
     finally:
         GPIO.cleanup()
 
-
+#main()
 client.loop.run_until_complete(main())
