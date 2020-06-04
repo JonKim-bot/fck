@@ -127,7 +127,6 @@ def ledLightOnGreen():
 
     GPIO.setwarnings(False)
     GPIO.setup(16, GPIO.OUT)
-    print("LED on")
     GPIO.output(16, GPIO.HIGH)
     time.sleep(1)
     GPIO.cleanup()  # Clean up
@@ -143,7 +142,6 @@ def ledLightOnRed():
 
     GPIO.setwarnings(False)
     GPIO.setup(18, GPIO.OUT)
-    print("LED on")
     GPIO.output(18, GPIO.HIGH)
     time.sleep(1)
 
@@ -160,12 +158,11 @@ def ledLightOnOrange():
 
     GPIO.setwarnings(False)
     GPIO.setup(21, GPIO.OUT)
-    print("LED on")
     GPIO.output(21, GPIO.HIGH)
     time.sleep(1)
     GPIO.cleanup()  # Clean up
 
-
+print("Register module ... Booting....")
 refresh("----------------------------------", "Register Module", "Booting....", "------------------------------------")
 reader = SimpleMFRC522()
 
@@ -251,10 +248,10 @@ def registerStudentCard(studentId,studentName,conn):
             conn.commit()
             refresh("--------------------", "Student Card", "Register Successfully", "----------------------")
 
-            print("Data register student table using the prepared statement")
+            print("Data registered into student table ")
             ledLightOnGreen()
         else:
-            print("Student Card Registered")
+            print("Student Card Registered , Please use an empty card..")
             refresh("--------------------", "This card ", "already registered", "----------------------")
             ledLightOnRed()
 
@@ -280,9 +277,9 @@ def registerParentCard(parentId,parentName,conn):
             refresh("--------------------", "Parent Card", "Register Successfully", "----------------------")
             ledLightOnGreen()
 
-            print("Data register parent table using the prepared statement")
+            print("Data register into parent table")
         else:
-            print("parent Card Registered")
+            print("Parent Card Registered, Please use an empty card..")
             ledLightOnRed()
             refresh("----------------------", "This card ", "already registered", "----------------------")
 
@@ -304,13 +301,16 @@ def registerParent(conn):
 
         refresh("----------------------", "Confirm Scan Card", "To Register Parent", "----------------------")
 
-        print("written parentName")
+        print("Please wait... reading card...")
         id, text = reader.read()
+        refresh("----------------------", "Reading card...", "Please wait....", "----------------------")
+
         buzzer.buzzerOn()
+        conn = connectSql()
 
 
-        print(id)
-        print(text)
+        print("Card ID : ",id)
+        print("Card Holder Name : ",text)
         registerParentCard(id,text,conn)
     except Exception as e:
         print(e)
@@ -331,12 +331,15 @@ def registerStudent(conn):
 
         refresh("----------------------", "Confirm Scan Card", "To Register Student", "----------------------")
 
-        print("written studentTable")
+        print("Confirm scanning .. ")
         id, text = reader.read()
         buzzer.buzzerOn()
+        conn = connectSql()
+        refresh("----------------------", "Reading card...", "Please wait....", "----------------------")
 
-        print(id)
-        print(text)
+
+        print("Card ID : ",id)
+        print("Card Holder Name : ",text)
         registerStudentCard(id,text,conn)
     except Exception as e:
         print(e)

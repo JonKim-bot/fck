@@ -11,9 +11,7 @@ def buzzerOn():
     GPIO.setup(buzzer,GPIO.OUT)
     
     GPIO.output(buzzer,GPIO.HIGH)
-    print ("Beep")
     time.sleep(0.2) # Delay in seconds
     GPIO.output(buzzer,GPIO.LOW)
-    print ("No Beep")
     GPIO.cleanup()  # Clean up
 buzzerOn()

@@ -65,12 +65,11 @@ def ledLightOnGreen():
 
     GPIO.setwarnings(False)
     GPIO.setup(16, GPIO.OUT)
-    print("LED on")
     GPIO.output(16, GPIO.HIGH)
     time.sleep(2)
     GPIO.cleanup()  # Clean up
 
-
+ledLightOnGreen()
 def ledLightOnRed():
     print("LED Red On")
     GPIO.setmode(GPIO.BCM)
@@ -81,7 +80,6 @@ def ledLightOnRed():
 
     GPIO.setwarnings(False)
     GPIO.setup(18, GPIO.OUT)
-    print("LED on")
     GPIO.output(18, GPIO.HIGH)
     time.sleep(2)
 
@@ -98,7 +96,6 @@ def ledLightOnOrange():
 
     GPIO.setwarnings(False)
     GPIO.setup(21, GPIO.OUT)
-    print("LED on")
     GPIO.output(21, GPIO.HIGH)
     time.sleep(2)
     GPIO.cleanup()  # Clean up
@@ -301,6 +298,7 @@ def validStudent(sCardId, dateToday, type1,conn):
     finally:
         cursor.close()
 
+print("Qr code module ... Booting....")
 
 def insertQr(parentId, parentName, studentId, type, status, message, checkInOutTime, msgDate,
              confirmStatus,conn):
@@ -511,9 +509,9 @@ def checkBooking(studentName, pickUpDate, pickUpTimeOne, pickUpTimeTwo, todayTim
                 conn.commit()
                 result = list(cursor.fetchall())
                 final_result = [list(i) for i in result]
-                print(final_result, "is the result")
+                #print(final_result, "is the result")
                 finalData = ''
-                print(len(final_result), "num row")
+                #print(len(final_result), "num row")
                 if len(result) > 0:
                     updateId = final_result[0][0]
                     print(pickUpDate)
@@ -537,7 +535,7 @@ def checkBooking(studentName, pickUpDate, pickUpTimeOne, pickUpTimeTwo, todayTim
     
                 if finalData == "Valid":
                     ledLightOnGreen()
-                    print("final data valid pick up date",pickUpDate)
+                    #print("final data valid pick up date",pickUpDate)
                     refresh("------------------------------", "Valid Qr Code", studentName, "-------------------------------")
                     parentId = getParentId(studentName, pickUpDate, pickUpTimeOne, pickUpTimeTwo,conn)
                     # get parent id from tblparentbooking
@@ -545,19 +543,20 @@ def checkBooking(studentName, pickUpDate, pickUpTimeOne, pickUpTimeTwo, todayTim
                     parentEmail = getEmail(parentId,conn)
     
                     # get email by passing the parent id
-                    print("parent email", parentEmail)
+                    print("Parent email : ", parentEmail)
     
     
                     sendEmail(parentEmail,studentName,pickUpDate,TimeNow)
+                    print("Email sended to parent..")
                     # send confirm email
-                    print("can bring children home")
+                    print("*** Valid Qr Code ***")
                     tkinter.messagebox.showinfo(title="Valid Qr Code", message="Qr code Valid, Pick Up Successful")
     
                 elif finalData == "Not Valid":
                     refresh("------------------------------", "Qr code Expired ", "Not able to use", "------------------------------")
     
                     ledLightOnRed()
-                    print("qr code expired")
+                    print("Qr code expired")
                     tkinter.messagebox.showinfo(title="Qr Code Not Valid", message="Qr code Expired")
     
                 elif finalData == "No Record Found":
@@ -612,7 +611,7 @@ cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
 
 detector = cv2.QRCodeDetector()
 refresh("------------------------------", "Place Qr code", "Infront of camera", "----------------------------")
-
+print("Place Qr code infront of the camera to scan...")
 while True:
 
     _, img = cap.read()
@@ -635,21 +634,17 @@ while True:
                 refresh("------------------------------", "Please wait.....", "Reading Qr Code...", "--------------------------------------")
 
                 qrcodeArr = data.split(",")
-                print(qrcodeArr[0])
-                print(qrcodeArr[1])
-                print(qrcodeArr[2])
-                print(qrcodeArr[3])
+                
                 TimeNow = (datetime.now().strftime("%H:%M"))
                 todayTime  = datetime.now().time().replace(microsecond=0)
-
-                print(todayTime)
-
+                print("Reading qr code.....")
                 checkBooking(qrcodeArr[0], qrcodeArr[1], qrcodeArr[2], qrcodeArr[3], todayTime,conn)
                 sys.exit()
 
             except Exception as e:
                 print(e)
 
+                print("Invalid Qr code.....")
 
                 #      cap.release()
                 #     cv2.destroyAllWindows()

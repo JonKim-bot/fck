@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import RPi.GPIO as GPIO
 from mfrc522 import SimpleMFRC522
 from gpiozero import Buzzer
@@ -23,7 +25,6 @@ def ledLightOnRed():
 
     GPIO.setwarnings(False)
     GPIO.setup(18, GPIO.OUT)
-    print("LED on")
     GPIO.output(18, GPIO.HIGH)
     time.sleep(0.5)
 
@@ -135,14 +136,15 @@ refresh("1", "2", "3", "4")
 reader = SimpleMFRC522()
 while True:
     try:
+        print("Wating for the card to scan....")
         refresh("-------------------", "Scan the card", "TO DETECT", "-----------------------------")
 
         id, text = reader.read()
         buzzer.buzzerOn()
         ledLightOnRed()
 
-        print(id)
-        print(text)
+        print("Card ID : "+str(id))
+        print("Card Holder Name : "+str(text))
         refresh("-------Card Id-------", id, "-------Card Name-------", text)
         time.sleep(3)
     finally:

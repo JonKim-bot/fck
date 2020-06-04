@@ -31,7 +31,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 client = Client()
 
-
+print("Pick up module ... Booting....")
 
 def sendEmail(email,studentName,todayDate,timeToday):
 
@@ -46,7 +46,6 @@ def sendEmail(email,studentName,todayDate,timeToday):
     mailserver = smtplib.SMTP('smtp.hostinger.my', 587)
     # identify ourselves to smtp gmail client
     mailserver.ehlo()
-    print("pass")
     # secure our email with tls encryption
     mailserver.starttls()
     # re-identify ourselves as an encrypted connection
@@ -54,7 +53,7 @@ def sendEmail(email,studentName,todayDate,timeToday):
     mailserver.login('boitan@piegensoftware.com', 'caonima123')
 
     mailserver.sendmail('boitan@piegensoftware.com', email, msg.as_string())
-    print("email sended")
+    print("Email Sended,,,")
     mailserver.quit()
     
 def ledLightOnGreen():
@@ -70,9 +69,8 @@ def ledLightOnGreen():
 
     GPIO.setwarnings(False)
     GPIO.setup(16, GPIO.OUT)
-    print("LED on")
     GPIO.output(16, GPIO.HIGH)
-    time.sleep(2)
+    time.sleep(1.5)
     GPIO.cleanup()  # Clean up
 
 
@@ -86,9 +84,8 @@ def ledLightOnRed():
 
     GPIO.setwarnings(False)
     GPIO.setup(18, GPIO.OUT)
-    print("LED on")
     GPIO.output(18, GPIO.HIGH)
-    time.sleep(2)
+    time.sleep(1.5)
 
     GPIO.cleanup()  # Clean up
 
@@ -105,15 +102,13 @@ def ledLightOnOrange():
 
     GPIO.setwarnings(False)
     GPIO.setup(21, GPIO.OUT)
-    print("LED on")
     GPIO.output(21, GPIO.HIGH)
-    time.sleep(2)
+    time.sleep(1.5)
     GPIO.cleanup()  # Clean up
-
+ledLightOnGreen()
 
 def refresh(word, sid, parentName, timeNow):
     # Raspberry Pi pin configuration:
-    print("begun")
     RST = None  # on the PiOLED this pin isnt used
     # Note the following are only used with SPI:
     DC = 23
@@ -153,11 +148,10 @@ def refresh(word, sid, parentName, timeNow):
 
     # Initialize library.
     disp.begin()
-    print("begun")
     # Clear display.
     disp.clear()
     disp.display()
-    print("display")
+    print("Start Diplaying....")
 
     # Create blank image for drawing.
     # Make sure to create image with mode '1' for 1-bit color.
@@ -534,6 +528,7 @@ def validPickUp(sCardId, dateToday, type,conn):
         cursor.close()
 
 
+
 def getEmail(pCardId,conn):
 
     query = """SELECT email FROM parentTable WHERE parentId = '%s'""" % (
@@ -646,19 +641,25 @@ async def main():
     print(f"Own ID: {client.uid}")
 
     def getCard2id():
-        print("Please autenticated your second card")
+        print("Parent autenticate their card....")
         refresh("---------------------------------", "Parent Please Scan", "Your Card", "---------------------------------")
 
         ledLightOnOrange()
 
         id, text2 = reader.read()
+        print("Card ID : ",id)
+        print("Card Holder Name : ",text2)
+
         buzzer.buzzerOn()
+        conn = connectSql()
+
 
 
         refresh("---------------------------------", "PLEASE WAIT...", "READING CARD...", "---------------------------------")
 
         mySecCard = text2
         mySecCardId = id
+        print("Parent Name :  " + str(mySecCard))
         return mySecCardId
 
 
@@ -667,11 +668,17 @@ async def main():
             conn = connectSql()
 
             # store the list of card to check
-            print("Scan your first card to bring your child home")
+            print("Student scan the card..")
             refresh("---------------------------------", "Student Please Scan", "Your Card", "---------------------------------")
             id1, text = reader.read()
+
             buzzer.buzzerOn()
+            ledLightOnRed()
+
             refresh("---------------------------------", "PLEASE WAIT...", "READING CARD....", "---------------------------------")
+            conn = connectSql()
+            print("Card ID : ",id1)
+            print("Card Holder Name : ",text)
 
             # get the id and name of the card
             # print(id)
@@ -683,9 +690,11 @@ async def main():
             # can be done by forcing all the 4 column to be the diffrent value or comparison with the value that previosly inserted
 
             myFirstCard = text
+            
+            
             myFirstCardId = id1
             returnedAutentication = (autentication(myFirstCardId,conn))  # )#+"is the resultttt")
-            print(returnedAutentication, " is returned autenticated")
+            #print(returnedAutentication, " is returned autenticated")
             if (returnedAutentication != "None"):
                 autenList = str(returnedAutentication).replace("'", "")
                 newAuten = str(autenList).split(',')
@@ -693,30 +702,30 @@ async def main():
             else:
                 newA = ['None', 'None']
 
-            print(newA[0], "index 0 ")
-            print(newA)
+            #print(newA[0], "index 0 ")
+            #print(newA)
 
             print()
-            print(newA[1], "index 1 ")
+           # print(newA[1], "index 1 ")
             today = datetime.date.today()
 
-            print(today)
+            print("Date Today : ",today)
             todaytime = datetime.datetime.now().time().replace(microsecond=0)
-            print(todaytime)
+            print("Time Now : ",todaytime)
 
-            print(myFirstCardId)
+            #print(myFirstCardId)
             print()
             if newA.__contains__(str(myFirstCardId)):
                 print("Card is in the autentication")
-                print(str(myFirstCardId))
+                #print(str(myFirstCardId))
                 index = newA.index(str(myFirstCardId))
-                print(index, "is the new a indexx ohhhh")
+               # print(index, "is the new a indexx ohhhh")
 
                 # valid pick up is string
                 validPickUp2 = (int(validPickUp(myFirstCardId, today, "pickUp",conn))) + (
                     int(validPickUp(myFirstCardId, today, "qrPickUp",conn)))
                 # valid pick up checking for index 1
-                print(validPickUp2, "is the type of valid pick up")
+                print(validPickUp2, " is the valid pick up")
                 # if the index is equal 0 mean first item from the query then its parent so i nid to compare with index 2
                 parentCardStatus = checkParentCardStatus(myFirstCardId,conn)
                 studentCardStatus2 = checkStudentCardStatus(myFirstCardId,conn)
@@ -743,6 +752,8 @@ async def main():
                     AttendanceStatus = getAttendance(Card2id, today,conn)
                     # print(Card2id,"card2")
                     # print(newA[1],"new a [1]")
+                    
+                    
                     if str(Card2id) == newA[1] and studentCardStatus == "Valid" and int(
                             checkPickUp) < 1 and AttendanceStatus == "present":
                         # if Card2 that is same as the newA[1] which is the index that return in the sql query
@@ -798,7 +809,7 @@ async def main():
 
 
                 elif index == 1 and studentCardStatus2 == "Valid" and int(validPickUp2) < 1:
-                    print("student just scan the card\n")
+                    print("Student just scan the card\n")
                     AttendanceStatus = getAttendance(myFirstCardId, today,conn)
                     if (AttendanceStatus == "present"):
 
@@ -806,16 +817,18 @@ async def main():
                         ledLightOnRed()
                         print(myFirstCardId, "is student ")
 
+
+
                         Card2id = getCard2id()
                         cparentCardStatus = checkParentCardStatus(int(Card2id),conn)
 
                         if str(Card2id) == newA[0] and cparentCardStatus == "Valid":
                             parentEmail = getEmail(Card2id,conn)
-                            print(parentEmail, " is email")
+                            print(parentEmail, " is email of the parent...")
                             parentFb = findFbId(Card2id,conn)
 
-                            print("**student and parent are matched**\n")
-                            print(Card2id, "is parent ")
+                            print("**Autentication success**\n")
+                            print(Card2id, "is parent card id")
                             refresh("------------------------------", "Autentication Success", "ID Matches", "----------------------------")
                             insertPickUp(myFirstCardId, Card2id, todaytime, today,conn)
 
@@ -834,47 +847,57 @@ async def main():
                             else:
                                 refresh("---------------------------------", "PARENT FACEBOOK", "NOT FOUND", "---------------------------------")
 
-                                print("parent fb not found")
+                                print("Parent fb not found")
                             sendEmail(parentEmail,myFirstCard,today,todaytime)
                             refresh("---------------------------------", "EMAIL SENDED", "CHECK YOUR EMAIL", "---------------------------------")
-
+                            print("Notification sended...")
 
                         elif str(Card2id) == newA[1]:
                             refresh("-----------------------------------","Duplicated Scanning","Please Try Again","------------------------------")
                             ledLightOnRed()
+                            print("Duplicated scanning...")
 
                         elif cparentCardStatus != "Valid":
                             refresh("-----------------------------------", "Parent Card Invalid", "Please contact Admin", "-----------------------------------")
                             ledLightOnRed()
+                            print("Parent Card Invalid..")
+
 
                         else:
+                            print("Autentication failed")
                             refresh("-----------------------------------", "Autentication Failed", "ID Not Matched ", "-----------------------------------")
                             ledLightOnRed()
                     else:
                         refresh("---------------------------------", "Student Absents", "Didn Attend Today", "---------------------------------")
                         ledLightOnRed()
-                        print("Not attendance found")
+                        print("No attendance record found ")
+
 
 
                 else:
                     if int(validPickUp2) >= 1:
                         # if student picked up already
                         refresh("--------------------------------", str(myFirstCard) + " Check Outed",
-                                "This student go back already", "------------------------------")
+                                "Student go back already", "------------------------------")
                         ledLightOnRed()
+                        print("Student go back already today...")
                     elif parentCardStatus != "Valid":
 
                         refresh("-----------------------------------", "Parent Card Invalid", "Please contact Admin",
                                 "-----------------------------------")
 
                         ledLightOnRed()
+                        print("Parent card invalid...")
 
                     elif studentCardStatus2 != "Valid":
 
                         refresh("-----------------------------------", "Student Card Invalid", "Please contact Admin",
                                 "-----------------------------------")
                         ledLightOnRed()
+                        print("Student card invalid...")
+
                     else:
+                        print("Card invalid...")
 
                         refresh("-----------------------------------", "Card Invalid", "Please use registered Card",
                                 "-----------------------------------")
@@ -884,20 +907,21 @@ async def main():
 
             elif newA[0] == "":
                 # if newA return nothing mean no record in database
-                print("Card is not registered yet\n")
+                print("Card is not registered...\n")
 
                 refresh("-----------------------------------", "Card Invalid", "Please use registered Card",
                         "-----------------------------------")
-                time.sleep(2)
+                ledLightOnRed()
 
             else:
                 print("Card not in the autentication\n")
+                ledLightOnRed()
 
                 refresh("-----------------------------------", "Card Invalid", "Please use registered Card",
                         "-----------------------------------")
                 # if the scanned card is not mathing the both record in the list
                 # means the card is registered but it doesnt math the record
-                time.sleep(2)
+                ledLightOnRed()
     except Exception as e:
         print(e)
     finally:
