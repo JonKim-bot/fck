@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import RPi.GPIO as GPIO
 from mfrc522 import SimpleMFRC522
 import mysql.connector
@@ -24,7 +26,6 @@ import Adafruit_SSD1306
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
-
 client = Client()
 
 
@@ -44,6 +45,56 @@ def ledLightOnGreen():
     GPIO.output(16, GPIO.HIGH)
     time.sleep(1)
     GPIO.cleanup()  # Clean up
+
+
+def sendNotifications(parentId,message):
+    url = "https://boitan.000webhostapp.com/sendNotification.php"
+    user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
+    try:          # allStudent = []
+              # values = {
+              #         'allStudrecord' : "1",
+              # }
+              # data = urllib.parse.urlencode((values))
+              # data = data.encode(('ascii'))
+              # req = urllib.request.Request(url, data)
+              # #response = request.urlopen(req)
+              # with urllib.request.urlopen(req) as response:
+              #         the_page = response.read()
+              # allStudent = the_page.decode().split(",")
+              # for x in allStudent:
+              #         print(x)
+              # print(i)
+            data = {
+                    'sendbyid': "1",
+                'message': message,
+                'parentId': parentId,
+
+                #                'studentId': "943343799769",
+                    #'studentId' : "943343799769",
+                    #'parentId':'867364651663',
+                    #'timeNow':'22',
+                    #'datetoday': '2020-04-18'
+      #              'timeNow' : now,
+     #               'datetoday':datetime.now().strftime("%Y-%m-%d")
+                    # 'boitan',"1"
+                    }
+            data = parse.urlencode(data).encode()
+
+            req = Request(
+                    url,
+                    headers={'User-Agent': user_agent,
+                             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                             'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+                             'Accept-Encoding': 'none',
+                             'Accept-Language': 'en-US,en;q=0.8',
+                             'Connection': 'keep-alive'
+                             }
+                    ,data=data)
+            webpage = urlopen(req).read().decode()
+            print(webpage)
+
+    except Exception as e:
+        print(e)
 
 
 def ledLightOnRed():
@@ -1021,6 +1072,7 @@ async def main():
                             insertCheckinNotification(myCardId, todaytime, today,conn)
                             refresh("----------------------------", "Checked In", "Successfully", "-----------------------")
                             ledLightOnOrange()
+                            sendNotifications(parentId,myFirstCard + str(" just checked in to school."))
 
                             # print(parentId ,"is parent id")
 
@@ -1078,6 +1130,7 @@ async def main():
                         refresh("------------------------------", "Checking Out", "Please Wait......",
                                 "------------------------------")
                         ledLightOnGreen()
+                        sendNotifications(parentId,myFirstCard + str(" just checked out from school."))
 
                         if parentId != "None":  # if the user really have fb id
                             # get the parent id for search it in the email or fb

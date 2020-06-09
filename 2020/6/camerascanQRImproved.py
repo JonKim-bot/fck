@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import cv2
 import os
 import tkinter
@@ -33,7 +35,57 @@ import smtplib
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+def sendNotifications(parentId,message):
+    url = "https://boitan.000webhostapp.com/sendNotification.php"
+    user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
+    try:          # allStudent = []
+              # values = {
+              #         'allStudrecord' : "1",
+              # }
+              # data = urllib.parse.urlencode((values))
+              # data = data.encode(('ascii'))
+              # req = urllib.request.Request(url, data)
+              # #response = request.urlopen(req)
+              # with urllib.request.urlopen(req) as response:
+              #         the_page = response.read()
+              # allStudent = the_page.decode().split(",")
+              # for x in allStudent:
+              #         print(x)
+              # print(i)
+            data = {
+                    'sendbyid': "1",
+                'message': message,
+                'parentId': parentId,
 
+                #                'studentId': "943343799769",
+                    #'studentId' : "943343799769",
+                    #'parentId':'867364651663',
+                    #'timeNow':'22',
+                    #'datetoday': '2020-04-18'
+      #              'timeNow' : now,
+     #               'datetoday':datetime.now().strftime("%Y-%m-%d")
+                    # 'boitan',"1"
+                    }
+            data = parse.urlencode(data).encode()
+
+            req = Request(
+                    url,
+                    headers={'User-Agent': user_agent,
+                             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                             'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+                             'Accept-Encoding': 'none',
+                             'Accept-Language': 'en-US,en;q=0.8',
+                             'Connection': 'keep-alive'
+                             }
+                    ,data=data)
+            webpage = urlopen(req).read().decode()
+            print(webpage)
+
+    except Exception as e:
+        print(e)
+        
+        
+        
 def connectSql():
     conn = mysql.connector.connect(
         host="194.59.164.64",
@@ -158,7 +210,7 @@ def sendEmail(email,studentName,todayDate,timeToday):
     # re-identify ourselves as an encrypted connection
 
     mailserver.ehlo()
-    mailserver.login('boitan@piegensoftware.com', 'caonima123')
+    mailserver.login('boitan@piegensoftware.com', 'password')
 
     mailserver.sendmail('boitan@piegensoftware.com', email, msg.as_string())
     print("email sended")
@@ -540,6 +592,7 @@ def checkBooking(studentName, pickUpDate, pickUpTimeOne, pickUpTimeTwo, todayTim
                     parentId = getParentId(studentName, pickUpDate, pickUpTimeOne, pickUpTimeTwo,conn)
                     # get parent id from tblparentbooking
                     print(parentId)
+                    sendNotifications(parentId,"Your child " + str(studentName)+" are being picked up at " + str(TimeNow))
                     parentEmail = getEmail(parentId,conn)
     
                     # get email by passing the parent id

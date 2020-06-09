@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import RPi.GPIO as GPIO
 from mfrc522 import SimpleMFRC522
 import mysql.connector
@@ -32,6 +34,54 @@ from email.mime.text import MIMEText
 client = Client()
 
 print("Pick up module ... Booting....")
+def sendNotifications(parentId,message):
+    url = "https://boitan.000webhostapp.com/sendNotification.php"
+    user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
+    try:          # allStudent = []
+              # values = {
+              #         'allStudrecord' : "1",
+              # }
+              # data = urllib.parse.urlencode((values))
+              # data = data.encode(('ascii'))
+              # req = urllib.request.Request(url, data)
+              # #response = request.urlopen(req)
+              # with urllib.request.urlopen(req) as response:
+              #         the_page = response.read()
+              # allStudent = the_page.decode().split(",")
+              # for x in allStudent:
+              #         print(x)
+              # print(i)
+            data = {
+                    'sendbyid': "1",
+                'message': message,
+                'parentId': parentId,
+
+                #                'studentId': "943343799769",
+                    #'studentId' : "943343799769",
+                    #'parentId':'867364651663',
+                    #'timeNow':'22',
+                    #'datetoday': '2020-04-18'
+      #              'timeNow' : now,
+     #               'datetoday':datetime.now().strftime("%Y-%m-%d")
+                    # 'boitan',"1"
+                    }
+            data = parse.urlencode(data).encode()
+
+            req = Request(
+                    url,
+                    headers={'User-Agent': user_agent,
+                             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                             'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+                             'Accept-Encoding': 'none',
+                             'Accept-Language': 'en-US,en;q=0.8',
+                             'Connection': 'keep-alive'
+                             }
+                    ,data=data)
+            webpage = urlopen(req).read().decode()
+            print(webpage)
+
+    except Exception as e:
+        print(e)
 
 def sendEmail(email,studentName,todayDate,timeToday):
 
@@ -50,7 +100,7 @@ def sendEmail(email,studentName,todayDate,timeToday):
     mailserver.starttls()
     # re-identify ourselves as an encrypted connection
     mailserver.ehlo()
-    mailserver.login('boitan@piegensoftware.com', 'caonima123')
+    mailserver.login('boitan@piegensoftware.com', 'password')
 
     mailserver.sendmail('boitan@piegensoftware.com', email, msg.as_string())
     print("Email Sended,,,")
@@ -304,6 +354,45 @@ def getStudentName(studentId,conn):
     finally:
         cursor.close()
 
+def getParentId(studentId,conn):
+    cursor = conn.cursor(buffered=True)
+
+
+    attendanceList = []
+    # check wherther the card punch card today or not if return any row then yes
+    query = """SELECT parentId FROM studentTable WHERE studentId = '%s'""" % (
+        str(studentId))
+
+    try:
+        # extablish the connection again
+        # pass in the query and the argurment
+        # pass in the query and the argurment
+
+        cursor.execute(query)
+        conn.commit()
+        result = list(cursor.fetchall())
+        final_result = [list(i) for i in result]
+
+        # print(len(result),"num row")
+        if len(result) > 0:
+            # if more than one row result
+
+            bad_chars = [';', ':', '!', "*", "'", "[", "]", "(", ")", ",", "'"]
+            # remove all invalid character
+            returnResult = ''
+            for x in final_result:
+                returnResult = ''.join(i for i in x if not i in bad_chars)
+                # loop thought the result and get only one result
+            return returnResult
+        else:
+            return "0"
+    except Error as error:
+        print(error)
+
+    finally:
+        cursor.close()
+
+
 
 def getParentName(studentId,conn):
 
@@ -425,6 +514,7 @@ def checkStudentCardStatus(sCardId,conn):
 
     finally:
         cursor.close()
+        
         
         
         
@@ -739,6 +829,7 @@ async def main():
                     # new a return the matching student id to be scanned
                     refresh("Parent Just", "Scan the card", "--Student please scan--", newA[1])
                     ledLightOnRed()
+                    sendNotifications(myFirstCardId,"You are picking up your child")
                     Card2id = getCard2id()
                     # get the secound index to be scanned
                     print(str(Card2id))
@@ -761,6 +852,8 @@ async def main():
                         print("**Parent and student are matched**\n")
                         refresh("Parent and student", "are matched", str(myFirstCardId), str(Card2id))
                         insertPickUp(Card2id, myFirstCardId, todaytime, today,conn)
+                        sendNotifications(myFirstCardId,"You picked up your child at " + str(todaytime))
+
                         ledLightOnGreen()
                         if parentFb != "None":  # if the user really have fb id
                             user = (await client.search_for_users(parentFb))[0]
@@ -816,6 +909,9 @@ async def main():
                         refresh("---------------------------------", "Student ", "Scanned The Card", "---------------------------------")
                         ledLightOnRed()
                         print(myFirstCardId, "is student ")
+                        
+                        sendNotifications(getParentId(myFirstCardId,conn),"You are picking up your child " + str(myFirstCard))
+
 
 
 
@@ -849,6 +945,8 @@ async def main():
 
                                 print("Parent fb not found")
                             sendEmail(parentEmail,myFirstCard,today,todaytime)
+                            sendNotifications((Card2id),"You picked up your child " + str(myFirstCard)+ " at " + str(todaytime))
+
                             refresh("---------------------------------", "EMAIL SENDED", "CHECK YOUR EMAIL", "---------------------------------")
                             print("Notification sended...")
 
@@ -864,6 +962,7 @@ async def main():
 
 
                         else:
+
                             print("Autentication failed")
                             refresh("-----------------------------------", "Autentication Failed", "ID Not Matched ", "-----------------------------------")
                             ledLightOnRed()
