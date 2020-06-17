@@ -962,11 +962,41 @@ def checkParentCardStatus(pCardId,conn):
 
 
 # print(allStudrecord(),"is student record")
-newStudentList = []
+def insertStudenttoday():
+    conn = connectSql()
+
+    cursor = conn.cursor(buffered=True)
+
+    newStudentList = []
+
+    for x in allStudrecord(conn):
+        bad_chars = [';', ':', '!', "*", "'", "[", "]"]
+        test_string = ''.join(i for i in x if not i in bad_chars)
+        print(str(test_string), " In student list")
+        # print(newStudentRecord)#None after remove the extra character
+        newStudentList.append(test_string)  # result = ['321', 'None', 'None', '943343799769']
+    try:
+        for z in newStudentList:
+            # newStudentList return all the student card id in card table
+            if z != "None" and int(checkCard(z, today,conn)) < 1:
+                # if student id is not equal to none and check card today record is lest than one
+                print(z," havent record attendance today")
+                # then help that student to insert record
+                insertStudentCheckin(z, today,conn)
+            elif z != "None" and int(checkCard(z, today,conn)) >= 1:
+                print(z, " recorded attendance already today !")
+    except Exception as e:
+        print(e)
+        print("***Something else when wrong***")
+
+    # auto insertion of the record that have not punch car4d today
+    del newStudentList[:]
+
 
 
 # print(CheckIfNotNull('943343799769','2019-12-19'),"is check if not null")
-
+insertStudenttoday()
+#insert student attendance
 def main():
     #await client.start("0169787592", "jijiji123")
     #print("****Login Success*****")
@@ -986,28 +1016,7 @@ def main():
             today = datetime.date.today()
 
 
-            for x in allStudrecord(conn):
-                bad_chars = [';', ':', '!', "*", "'", "[", "]"]
-                test_string = ''.join(i for i in x if not i in bad_chars)
-                print(str(test_string), " In student list")
-                # print(newStudentRecord)#None after remove the extra character
-                newStudentList.append(test_string)  # result = ['321', 'None', 'None', '943343799769']
-            try:
-                for z in newStudentList:
-                    # newStudentList return all the student card id in card table
-                    if z != "None" and int(checkCard(z, today,conn)) < 1:
-                        # if student id is not equal to none and check card today record is lest than one
-                        print(z," havent record attendance today")
-                        # then help that student to insert record
-                        insertStudentCheckin(z, today,conn)
-                    elif z != "None" and int(checkCard(z, today,conn)) >= 1:
-                        print(z, " recorded attendance already today !")
-            except Exception as e:
-                print(e)
-                print("***Something else when wrong***")
-
-            # auto insertion of the record that have not punch car4d today
-            del newStudentList[:]
+            
             # clear the list or else it will duplicate
             refresh("--------------------------------", "Scan your card to", "Record Attendance",
                     "-------------------------------")
