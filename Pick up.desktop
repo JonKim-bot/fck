@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=Pick up moduleF
+Terminal=true
+X-KeepTerminal=true
+Icon=/home/pi/pickup.png
+Exec=python3 /home/pi/BringChildHomeSqlWithoutFacebook.py
+
+Name[en_SG]=Pick up module

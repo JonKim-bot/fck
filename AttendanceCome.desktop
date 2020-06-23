@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=Attendance ModuleF
+Terminal=true
+X-KeepTerminal=true
+Icon=/home/pi/attendance.png
+Exec=python3 /home/pi/NewestCheckInOutWithoutfacebook.py
+
+Name[en_SG]=Attendance Module

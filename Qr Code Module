@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=Qr Code Module
+
+Terminal=true
+X-KeepTerminal=true
+Icon=/home/pi/qrcodeModule.png
+Exec=python3 /home/pi/camerascanQRImproved.py
+
+Name[en_SG]=Qr Code Module

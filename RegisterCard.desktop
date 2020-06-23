@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=Register Card
+
+Terminal=true
+X-KeepTerminal=true
+Icon=/home/pi/register.png
+Exec=python3 /home/pi/registerCardIMPROVEDDb.py
+
+Name[en_SG]=Register Card
