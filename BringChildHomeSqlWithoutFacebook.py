@@ -1026,6 +1026,8 @@ def main():
     finally:
         GPIO.cleanup()
 
-
-main()
+try:
+    main()
+except:
+    print("Error occured please try again")
 

@@ -349,16 +349,18 @@ def registerStudent(conn):
     finally:
         GPIO.cleanup()
 while True:
-    refresh("Select register people", "1 - Parent", "2 - Student ", "----------------------")
+    try:
+        refresh("Select register people", "1 - Parent", "2 - Student ", "----------------------")
 
-    getUserInput = input("Select register people\n1-Parent\n2-Student\n:")
-    if (int(getUserInput) == 1):
-        registerParent(conn)
-    elif(int(getUserInput) == 2):
-        registerStudent(conn)
-    else:
-        print("Invalid Selection")
-        refresh("----------------------", "Invalid", "Selection", "----------------------")
-
+        getUserInput = input("Select register people\n1-Parent\n2-Student\n:")
+        if (int(getUserInput) == 1):
+            registerParent(conn)
+        elif(int(getUserInput) == 2):
+            registerStudent(conn)
+        else:
+            print("Invalid Selection")
+            refresh("----------------------", "Invalid", "Selection", "----------------------")
+    except:
+        print("Invalid selection")
 
         

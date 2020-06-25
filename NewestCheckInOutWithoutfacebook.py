@@ -9,7 +9,6 @@ import datetime
 from mysql.connector import Error
 import buzzer
 import urllib.parse
-import sys
 
 import asyncio
 import urllib.request
@@ -30,7 +29,6 @@ from PIL import ImageFont
 client = Client()
 
 
-
 def ledLightOnGreen():
     print("LED Green On")
 
@@ -47,6 +45,7 @@ def ledLightOnGreen():
     GPIO.output(16, GPIO.HIGH)
     time.sleep(1)
     GPIO.cleanup()  # Clean up
+
 
 
 def sendNotifications(parentId,message):
@@ -872,7 +871,8 @@ def allStudrecord(conn):
             # ['321', '123 Foord', '123', '943343799769', '867364651663']
 
             return final_result
-        
+        else:
+            return "None"
     except Error as error:
         print(error)
 
@@ -968,17 +968,15 @@ def insertStudenttoday():
 
     cursor = conn.cursor(buffered=True)
 
-
     newStudentList = []
+
+    for x in allStudrecord(conn):
+        bad_chars = [';', ':', '!', "*", "'", "[", "]"]
+        test_string = ''.join(i for i in x if not i in bad_chars)
+        print(str(test_string), " In student list")
+        # print(newStudentRecord)#None after remove the extra character
+        newStudentList.append(test_string)  # result = ['321', 'None', 'None', '943343799769']
     try:
-        for x in allStudrecord(conn):
-            bad_chars = [';', ':', '!', "*", "'", "[", "]"]
-            test_string = ''.join(i for i in x if not i in bad_chars)
-            print(str(test_string), " In student list")
-            # print(newStudentRecord)#None after remove the extra character
-            newStudentList.append(test_string)  # result = ['321', 'None', 'None', '943343799769']
-
-
         for z in newStudentList:
             # newStudentList return all the student card id in card table
             if z != "None" and int(checkCard(z, today,conn)) < 1:
@@ -989,8 +987,8 @@ def insertStudenttoday():
             elif z != "None" and int(checkCard(z, today,conn)) >= 1:
                 print(z, " recorded attendance already today !")
     except Exception as e:
-        print("NO Kindergarden found")
-        sys.exit()
+        print(e)
+        print("***Something else when wrong***")
 
     # auto insertion of the record that have not punch car4d today
     del newStudentList[:]
@@ -1207,4 +1205,7 @@ def main():
 
 
 # main()
-main()
+try:
+    main()
+except:
+    print("Error occured please try again")
