@@ -87,13 +87,16 @@ def sendNotifications(parentId,message):
         
         
 def connectSql():
-    conn = mysql.connector.connect(
-        host="194.59.164.64",
-        user="u615769276_boitan",
-        passwd="password",
-        database="u615769276_finalyear"
-    )
-    return conn
+    try:
+        conn = mysql.connector.connect(
+            host="194.59.164.64",
+            user="u615769276_boitan",
+            passwd="password",
+            database="u615769276_finalyear"
+        )
+        return conn
+    except Exception as e:
+        print(e)
 
 
 # cursor.execute("SELECT * FROM tblCard")
@@ -188,33 +191,36 @@ def getParentName(email,conn):
         cursor.close()
 
 def sendEmail(email,studentName,todayDate,timeToday):
-    print("sending email")
-    print(email)
-    print(studentName)
-    print(todayTime)
-    print(timeToday)
-    msg = MIMEMultipart()
-    msg['From'] = "boitan@piegensoftware.com"
-    msg['To'] = email
-    msg['Subject'] = 'Qr Code Pick Up'
-    message = 'Your kid ' + str(studentName)  + "\nGet picked up today at the date of " +  str(todayDate) + " " + str(timeToday) + " \n\nThanks,\nThe Piegen team"
+    try:
+        print("sending email")
+        print(email)
+        print(studentName)
+        print(todayTime)
+        print(timeToday)
+        msg = MIMEMultipart()
+        msg['From'] = "boitan@piegensoftware.com"
+        msg['To'] = email
+        msg['Subject'] = 'Qr Code Pick Up'
+        message = 'Your kid ' + str(studentName)  + "\nGet picked up today at the date of " +  str(todayDate) + " " + str(timeToday) + " \n\nThanks,\nThe Piegen team"
 
-    msg.attach(MIMEText(message))
+        msg.attach(MIMEText(message))
 
-    mailserver = smtplib.SMTP('smtp.hostinger.my', 587)
-    # identify ourselves to smtp gmail client
-    mailserver.ehlo()
-    print("pass")
-    # secure our email with tls encryption
-    mailserver.starttls()
-    # re-identify ourselves as an encrypted connection
+        mailserver = smtplib.SMTP('smtp.hostinger.my', 587)
+        # identify ourselves to smtp gmail client
+        mailserver.ehlo()
+        print("pass")
+        # secure our email with tls encryption
+        mailserver.starttls()
+        # re-identify ourselves as an encrypted connection
 
-    mailserver.ehlo()
-    mailserver.login('boitan@piegensoftware.com', 'password')
+        mailserver.ehlo()
+        mailserver.login('boitan@piegensoftware.com', 'password')
 
-    mailserver.sendmail('boitan@piegensoftware.com', email, msg.as_string())
-    print("email sended")
-    mailserver.quit()
+        mailserver.sendmail('boitan@piegensoftware.com', email, msg.as_string())
+        print("email sended")
+        mailserver.quit()
+    except:
+        print("Email failed")
 
 
 def getEmail(pCardId,conn):

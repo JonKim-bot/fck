@@ -168,14 +168,18 @@ print("Register module ... Booting....")
 refresh("----------------------------------", "Register Module", "Booting....", "------------------------------------")
 reader = SimpleMFRC522()
 
+
 def connectSql():
-    conn = mysql.connector.connect(
-        host="194.59.164.64",
-        user="u615769276_boitan",
-        passwd="password",
-        database="u615769276_finalyear"
-    )
-    return conn
+    try:
+        conn = mysql.connector.connect(
+            host="194.59.164.64",
+            user="u615769276_boitan",
+            passwd="password",
+            database="u615769276_finalyear"
+        )
+        return conn
+    except Exception as e:
+        print(e)
 global conn
 conn = connectSql()
 
@@ -241,9 +245,9 @@ def registerStudentCard(studentId,studentName,conn):
         
         if (checkCardExistStudent(studentId,conn) == False) and (checkCardExistParent(studentId,conn) == False):
             # if studentcard never register yet
-            sql_insert_query = """INSERT INTO studentTable (studentId,studentName,studentCardStatus) VALUES (%s,%s,%s)"""
+            sql_insert_query = """INSERT INTO studentTable (studentId,studentName,studentCardStatus,kId) VALUES (%s,%s,%s,%s)"""
 
-            insert_tuple = (studentId,studentName,"Invalid")
+            insert_tuple = (studentId,studentName,"Invalid","1")
             
 
             cursor.execute(sql_insert_query, insert_tuple)
@@ -269,9 +273,9 @@ def registerParentCard(parentId,parentName,conn):
         
         if (checkCardExistParent(parentId,conn) == False) and (checkCardExistStudent(parentId,conn) == False):
             # if studentcard never register yet
-            sql_insert_query = """INSERT INTO parentTable (parentId,parentName,parentCardStatus) VALUES (%s,%s,%s)"""
+            sql_insert_query = """INSERT INTO parentTable (parentId,parentName,parentCardStatus,kId) VALUES (%s,%s,%s,%s)"""
 
-            insert_tuple = (parentId,parentName,"Valid")
+            insert_tuple = (parentId,parentName,"Valid","1")
             
 
             cursor.execute(sql_insert_query, insert_tuple)
@@ -349,16 +353,18 @@ def registerStudent(conn):
     finally:
         GPIO.cleanup()
 while True:
-    refresh("Select register people", "1 - Parent", "2 - Student ", "----------------------")
+    try:
+        refresh("Select register people", "1 - Parent", "2 - Student ", "----------------------")
 
-    getUserInput = input("Select register people\n1-Parent\n2-Student\n:")
-    if (int(getUserInput) == 1):
-        registerParent(conn)
-    elif(int(getUserInput) == 2):
-        registerStudent(conn)
-    else:
-        print("Invalid Selection")
-        refresh("----------------------", "Invalid", "Selection", "----------------------")
-
+        getUserInput = input("Select register people\n1-Parent\n2-Student\n:")
+        if (int(getUserInput) == 1):
+            registerParent(conn)
+        elif(int(getUserInput) == 2):
+            registerStudent(conn)
+        else:
+            print("Invalid Selection")
+            refresh("----------------------", "Invalid", "Selection", "----------------------")
+    except:
+        print("Invalid selection")
 
         
