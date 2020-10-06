@@ -87,13 +87,17 @@ def sendNotifications(parentId,message):
         
         
 def connectSql():
-    conn = mysql.connector.connect(
-        host="194.59.164.64",
-        user="u615769276_boitan",
-        passwd="password",
-        database="u615769276_finalyear"
-    )
-    return conn
+    try:
+        conn = mysql.connector.connect(
+            
+            host="194.59.164.64",
+            user="u615769276_boitan",
+            passwd="password",
+            database="u615769276_finalyear"
+        )
+        return conn
+    except Exception as e:
+        print(e)
 
 
 # cursor.execute("SELECT * FROM tblCard")
@@ -121,7 +125,7 @@ def ledLightOnGreen():
     time.sleep(2)
     GPIO.cleanup()  # Clean up
 
-ledLightOnGreen()
+#ledLightOnGreen()
 def ledLightOnRed():
     print("LED Red On")
     GPIO.setmode(GPIO.BCM)
@@ -188,33 +192,36 @@ def getParentName(email,conn):
         cursor.close()
 
 def sendEmail(email,studentName,todayDate,timeToday):
-    print("sending email")
-    print(email)
-    print(studentName)
-    print(todayTime)
-    print(timeToday)
-    msg = MIMEMultipart()
-    msg['From'] = "boitan@piegensoftware.com"
-    msg['To'] = email
-    msg['Subject'] = 'Qr Code Pick Up'
-    message = 'Your kid ' + str(studentName)  + "\nGet picked up today at the date of " +  str(todayDate) + " " + str(timeToday) + " \n\nThanks,\nThe Piegen team"
+    try:
+        print("sending email")
+        print(email)
+        print(studentName)
+        print(todayTime)
+        print(timeToday)
+        msg = MIMEMultipart()
+        msg['From'] = "boitan@piegensoftware.com"
+        msg['To'] = email
+        msg['Subject'] = 'Qr Code Pick Up'
+        message = 'Your kid ' + str(studentName)  + "\nGet picked up today at the date of " +  str(todayDate) + " " + str(timeToday) + " \n\nThanks,\nThe Piegen team"
 
-    msg.attach(MIMEText(message))
+        msg.attach(MIMEText(message))
 
-    mailserver = smtplib.SMTP('smtp.hostinger.my', 587)
-    # identify ourselves to smtp gmail client
-    mailserver.ehlo()
-    print("pass")
-    # secure our email with tls encryption
-    mailserver.starttls()
-    # re-identify ourselves as an encrypted connection
+        mailserver = smtplib.SMTP('smtp.hostinger.my', 587)
+        # identify ourselves to smtp gmail client
+        mailserver.ehlo()
+        print("pass")
+        # secure our email with tls encryption
+        mailserver.starttls()
+        # re-identify ourselves as an encrypted connection
 
-    mailserver.ehlo()
-    mailserver.login('boitan@piegensoftware.com', 'password')
+        mailserver.ehlo()
+        mailserver.login('boitan@piegensoftware.com', 'password')
 
-    mailserver.sendmail('boitan@piegensoftware.com', email, msg.as_string())
-    print("email sended")
-    mailserver.quit()
+        mailserver.sendmail('boitan@piegensoftware.com', email, msg.as_string())
+        print("email sended")
+        mailserver.quit()
+    except:
+        print("Email failed")
 
 
 def getEmail(pCardId,conn):
@@ -381,106 +388,6 @@ def insertQr(parentId, parentName, studentId, type, status, message, checkInOutT
         cursor.close()
 
 
-
-def refresh(word, sid, parentName, timeNow):
-    # Raspberry Pi pin configuration:
-    RST = None  # on the PiOLED this pin isnt used
-    # Note the following are only used with SPI:
-    DC = 23
-    SPI_PORT = 0
-    SPI_DEVICE = 0
-
-    # Beaglebone Black pin configuration:
-    # RST = 'P9_12'
-    # Note the following are only used with SPI:
-    # DC = 'P9_15'
-    # SPI_PORT = 1
-    # SPI_DEVICE = 0
-
-    # 128x32 display with hardware I2C:
-    disp = Adafruit_SSD1306.SSD1306_128_32(rst=RST)
-
-    # 128x64 display with hardware I2C:
-    # disp = Adafruit_SSD1306.SSD1306_128_64(rst=RST)
-
-    # Note you can change the I2C address by passing an i2c_address parameter like:
-    # disp = Adafruit_SSD1306.SSD1306_128_64(rst=RST, i2c_address=0x3C)
-
-    # Alternatively you can specify an explicit I2C bus number, for example
-    # with the 128x32 display you would use:
-    # disp = Adafruit_SSD1306.SSD1306_128_32(rst=RST, i2c_bus=2)
-
-    # 128x32 display with hardware SPI:
-    # disp = Adafruit_SSD1306.SSD1306_128_32(rst=RST, dc=DC, spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE, max_speed_hz=8000000))
-
-    # 128x64 display with hardware SPI:
-    # disp = Adafruit_SSD1306.SSD1306_128_64(rst=RST, dc=DC, spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE, max_speed_hz=8000000))
-
-    # Alternatively you can specify a software SPI implementation by providing
-    # digital GPIO pin numbers for all the required display pins.  For example
-    # on a Raspberry Pi with the 128x32 display you might use:
-    # disp = Adafruit_SSD1306.SSD1306_128_32(rst=RST, dc=DC, sclk=18, din=25, cs=22)
-
-    # Initialize library.
-    disp.begin()
-    # Clear display.
-    disp.clear()
-    disp.display()
-
-    # Create blank image for drawing.
-    # Make sure to create image with mode '1' for 1-bit color.
-    width = disp.width
-    height = disp.height
-    image = Image.new('1', (width, height))
-
-    # Get drawing object to draw on image.
-    draw = ImageDraw.Draw(image)
-
-    # Draw a black filled box to clear the image.
-    draw.rectangle((0, 0, width, height), outline=0, fill=0)
-
-    # Draw some shapes.
-    # First define some constants to allow easy resizing of shapes.
-    padding = -2
-    top = padding
-    bottom = height - padding
-    # Move left to right keeping track of the current x position for drawing shapes.
-    x = 0
-
-    # Load default font.
-    font = ImageFont.load_default()
-
-    # Alternatively load a TTF font.  Make sure the .ttf font file is in the same directory as the python script!
-    # Some other nice fonts to try: http://www.dafont.com/bitmap.php
-    # font = ImageFont.truetype('Minecraftia.ttf', 8)
-
-    # Draw a black filled box to clear the image.
-    draw.rectangle((0, 0, width, height), outline=0, fill=0)
-
-    # Shell scripts for system monitoring from here : https://unix.stackexchange.com/questions/119126/command-to-display-memory-usage-disk-usage-and-cpu-load
-    cmd = "hostname -I | cut -d\' \' -f1"
-    IP = subprocess.check_output(cmd, shell=True)
-    cmd = "top -bn1 | grep load | awk '{printf \"CPU Load: %.2f\", $(NF-2)}'"
-    CPU = subprocess.check_output(cmd, shell=True)
-    cmd = "free -m | awk 'NR==2{printf \"Mem: %s/%sMB %.2f%%\", $3,$2,$3*100/$2 }'"
-    MemUsage = subprocess.check_output(cmd, shell=True)
-    cmd = "df -h | awk '$NF==\"/\"{printf \"Disk: %d/%dGB %s\", $3,$2,$5}'"
-    Disk = subprocess.check_output(cmd, shell=True)
-
-    # Write two lines of text.
-
-
-    draw.text((x, top), str(word), font=font, fill=255)
-    draw.text((x, top + 8), str(sid), font=font, fill=255)
-    draw.text((x, top + 16), str(parentName), font=font, fill=255)
-    draw.text((x, top + 25), str(timeNow), font=font, fill=255)
-
-    # Display image.
-    disp.image(image)
-    disp.display()
-
-refresh("------------------------------", "Qr Code module", "Booting......", "----------------------------")
-
 def insertQrPickUp(updateId, pickUpDate, timeNow,conn):
     # check booking data by passing all data inhere
     # check booking data by passing all data inhere
@@ -586,9 +493,8 @@ def checkBooking(studentName, pickUpDate, pickUpTimeOne, pickUpTimeTwo, todayTim
                 print(finalData)
     
                 if finalData == "Valid":
-                    ledLightOnGreen()
+                    
                     #print("final data valid pick up date",pickUpDate)
-                    refresh("------------------------------", "Valid Qr Code", studentName, "-------------------------------")
                     parentId = getParentId(studentName, pickUpDate, pickUpTimeOne, pickUpTimeTwo,conn)
                     # get parent id from tblparentbooking
                     print(parentId)
@@ -599,31 +505,25 @@ def checkBooking(studentName, pickUpDate, pickUpTimeOne, pickUpTimeTwo, todayTim
                     print("Parent email : ", parentEmail)
     
     
-                    sendEmail(parentEmail,studentName,pickUpDate,TimeNow)
                     print("Email sended to parent..")
                     # send confirm email
                     print("*** Valid Qr Code ***")
                     tkinter.messagebox.showinfo(title="Valid Qr Code", message="Qr code Valid, Pick Up Successful")
     
                 elif finalData == "Not Valid":
-                    refresh("------------------------------", "Qr code Expired ", "Not able to use", "------------------------------")
-    
-                    ledLightOnRed()
+                    
                     print("Qr code expired")
                     tkinter.messagebox.showinfo(title="Qr Code Not Valid", message="Qr code Expired")
     
                 elif finalData == "No Record Found":
-                    refresh("------------------------------", "No Booking Found ", "Qr Code Invalid", "------------------------------")
-                    ledLightOnRed()
+                    
     
                     tkinter.messagebox.showwarning(title="No Booking Record Found",
                                                    message="No Booking Record Found , Please make the booking first.")
     
                     print("No Booking Record Found , Please make the booking first.")
             else:
-                refresh("-----------------------------", "Time not reach yet", "Qr code Time: "+str(pickUpTimeOne),
-                        "-----------------------------")
-                ledLightOnRed()
+            
     
                 tkinter.messagebox.showwarning(title="Time Not Reached Yet",
                                                message="Time Now Are Not With in the range")
@@ -632,17 +532,13 @@ def checkBooking(studentName, pickUpDate, pickUpTimeOne, pickUpTimeTwo, todayTim
         else:
     
             print("Booking Date are not today!")
-            ledLightOnRed()
-            refresh("------------------------------", "Booking Date Invalid", "Date : " + str(pickUpDate), "------------------------------")
+            
             tkinter.messagebox.showwarning(title="Booking Date are not today",
                                            message="Booking Date are not today,please try again with another qr code")
 
     except Error as error:
-         refresh("------------------------------", "Qr code Expired ", "Not able to use",
-                 "------------------------------")
-
+         
          print(error)
-         ledLightOnRed()
 
 
 # finally:
@@ -662,8 +558,9 @@ def isNowInTimePeriod(startTime, endTime, nowTime):
 cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
 
+
 detector = cv2.QRCodeDetector()
-refresh("------------------------------", "Place Qr code", "Infront of camera", "----------------------------")
+
 print("Place Qr code infront of the camera to scan...")
 while True:
 
@@ -684,7 +581,6 @@ while True:
             conn = connectSql()
 
             try:
-                refresh("------------------------------", "Please wait.....", "Reading Qr Code...", "--------------------------------------")
 
                 qrcodeArr = data.split(",")
                 
@@ -701,10 +597,7 @@ while True:
 
                 #      cap.release()
                 #     cv2.destroyAllWindows()
-                ledLightOnRed()
 
-                refresh("--------------------------------", "Invalid QR Code", "Use another Qr code",
-                        "------------------------------------")
 
                 tkinter.messagebox.showwarning(title="Error",
                                                message="Invalid Qr Code\nPlease use valid qr code for booking")
